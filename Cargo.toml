@@ -1,0 +1,9 @@
+[workspace]
+members = ["crates/proto", "crates/render", "crates/mintd", "crates/sighash-wasm"]
+resolver = "2"
+
+# Local copy of zcash_transparent 0.11.0-pre.1 with one addition:
+# `pczt::InputUpdater::set_sighash_type`, needed to request
+# SIGHASH_SINGLE | ANYONECANPAY on a listing input. Upstream has no setter.
+[patch.crates-io]
+zcash_transparent = { path = "crates/vendor/zcash_transparent" }
