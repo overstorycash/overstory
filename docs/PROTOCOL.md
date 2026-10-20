@@ -1,16 +1,36 @@
-# Overstory Protocol, version 1 (draft)
+# Overstory Protocol v1
 
-Status: draft. The authenticated-envelope revision below is a local development candidate; its Rust regression tests have passed. It has not been deployed or validated on mainnet. Earlier private Regtest and explicitly non-production public-network tests covered the previous format, not this revision. The official collection is not deployed; production acceptance is incomplete.
+Technical specification · Mainnet collection · 20 October 2026
 
 Overstory is a metaprotocol on the Zcash transparent pool. It defines how an inscription
 is written, who owns it, how a collection is declared, how a mint joins a collection, how
 the artwork of a mint is derived, and how an item is sold without escrow. Every rule below
-can be evaluated by anyone replaying the chain; nothing depends on a server.
+can be evaluated by anyone replaying the chain; protocol validity does not depend on the official website. Public interfaces and the optional assisted-mint service remain operational services, distinct from the chain rules.
+
+## Abstract
+
+Overstory defines reproducible generative artwork and transferable ownership on Zcash's transparent transaction graph. An authenticated commit–reveal envelope binds the inscription data to its spending script. Collection membership is determined by canonical transaction order, a fixed supply, a start height and a required mint payment. A seed derived from the inscription transaction and its completion block produces the artwork through an inscribed deterministic renderer. Ownership follows a transparent output; secondary sales can settle atomically without custody of the item by a marketplace.
+
+## Official collection
+
+| Parameter | Mainnet value |
+|---|---|
+| Collection ID | `7255d20a586fa665c5d66a61b71f2f0a31f715597922e8e30b526f759faf44a2i0` |
+| Renderer ID | `51f848e31c5bf0ed38c5936129915a24fb08a85074c4c0d650be5de47671eec0i0` |
+| Supply | 3,000 valid mints |
+| First eligible block | 3,526,433 |
+| Mint payment | 0.05 ZEC (5,000,000 zatoshis) |
+| Mint recipient | `t1f7JPjEc8drDirsJfpMwbcdrWCHS7whgrt` |
+| Per-address limit | None |
+| Renderer source SHA-256 | `67b00f3dedee8a93014b6e8da71795f1766d91b5028892d587140aa96f221f42` |
+
+The renderer and collection declaration are confirmed on mainnet. The start block is authoritative; a calendar estimate is not a consensus condition. These parameters identify the official collection, while the following sections define the general protocol. A name alone does not identify a collection.
+
+The optional assisted-mint invoice totals 0.10 ZEC, including the mint payment and minting network fees. The sending wallet's transfer fee is additional. An invoice or payment does not reserve a mint number or guarantee membership. The official market remains closed during minting and opens only after sellout, index verification and a separate operational decision. Its 2% buyer fee is a marketplace policy, not a royalty enforced on all protocol transfers.
 
 ## 1. Networks and scope
 
-Zcash mainnet, testnet and regtest, transparent pool only. Value that enters a shielded
-pool ends protocol tracking permanently (section 3.3).
+Zcash mainnet, testnet and regtest, transparent pool only. Inscription ownership follows transparent outputs. A spend without a transparent non-data output terminates tracking as specified in section 3.3; the presence of a shielded bundle alone does not override a valid transparent carrier.
 
 Transaction versions 5 and 6 are valid carriers. Builders derive the consensus branch id,
 version group id and expiry height from the chain they target.
@@ -32,7 +52,7 @@ above the next unprocessed block on an existing index is rejected. The CLI's
 `index --max-blocks N` bounds work while retaining contiguous replay and durable restart;
 it does not skip history. A production acceleration checkpoint requires a separately
 verified complete state, a pinned chain anchor and explicit reorganization handling.
-That release gate remains open.
+The official self-mint workflow uses full replay; the project does not distribute an index checkpoint or provide a self-mint RPC service.
 
 ## 2. Inscriptions
 
@@ -247,7 +267,7 @@ moment its completion transaction is processed:
 
 A valid mint receives `number = (previous valid mint count) + 1`. A mint that fails any
 rule is an ordinary inscription: it keeps its content and ownership but is not a member,
-and its fees are not refunded. Membership is decided once and never changes.
+and its fees are not refunded. Membership is decided at completion on the canonical chain. A chain reorganization rolls back affected state and may change membership, numbering, ownership and the artwork seed.
 
 ### 4.3 Seed
 
@@ -305,13 +325,13 @@ passes.
   inscriptions, owners, collections, members, numbers and seeds. Replay from genesis must
   equal incremental indexing.
 
-## 8. Validation status and fees
+## 8. Verification, security model and fees
 
-The authenticated revision has local Rust regression coverage for envelope mutation,
-equivalent push encodings, authenticated collection membership, historical replay
-compatibility and explicit recovery. These checks do not establish production
-readiness or mainnet acceptance; node-level adversarial and end-to-end validation
-must be recorded separately before release.
+The reference implementation includes regression coverage for envelope mutation, equivalent push encodings, authenticated collection membership, historical replay and explicit recovery. The official renderer and collection have been checked against their confirmed mainnet bytes. Independent application-index replay has been compared at fixed canonical-chain anchors. These checks are evidence about tested versions and anchors; they are not a guarantee of future correctness or an independent implementation of Zcash consensus.
+
+The protocol relies on Zcash consensus, signature and hash security, complete canonical-chain data, and faithful implementation of these rules. Reorganizations require rollback and replay. The seed is reproducible but is not an unbiased randomness beacon: transaction selection and block production can influence its inputs. Ordinary wallets may spend a carrier as normal funds; use dedicated addresses and inscription-aware tools. Lost spending keys cannot be recovered by the protocol. Invalid, premature or excess-supply mints can spend funds without obtaining collection membership.
+
+Source code and preparation instructions: https://github.com/overstorycash/overstory. The technical rules apply independently of website availability. Assisted-mint custody, support and refunds are service responsibilities and must not be confused with a consensus refund mechanism.
 
 Reveal fees follow ZIP 317: 5,000 zatoshis per logical action, at least two actions.
 The larger authenticated redeem script changes the input size. Builders calculate

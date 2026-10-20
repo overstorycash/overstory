@@ -80,7 +80,7 @@
     "crates/vendor/zcash_transparent/src/util/mod.rs": "f59746e68267b6ce74ba40c9971820cfb3384f9884f77a4a25173a1222137e69",
     "crates/vendor/zcash_transparent/src/util/sha256d.rs": "89f5102feeaddd0b5d4895f563d84997631b36863b2743eb65cb33bce0da1ed0",
     "crates/vendor/zcash_transparent/src/zip48.rs": "a7ba8b927058229e97b9362baaab411d5a551ba7a43f1a4d687ad8953fa250e6",
-    "docs/PROTOCOL.md": "7cce3d1ef0115aecf210789773a0e0d89304ef526370c802e8161f9c6aede9f1",
+    "docs/PROTOCOL.md": "65e64bba34725aa9e50f3c0037213eb5047c78572bf4daf164fd177ba1cb1c0e",
     "regtest/mainnet_index.rs": "578b4089d365313e8654bcc9b2b05078602972e5feaad9189a18bce25b26f983",
     "regtest/recover_single_reveal.rs": "c5d4ccde31940631e921ebc52bab6929affaa4a94ab8ea311c09106d59280312",
     "regtest/testnet_index.rs": "cfa89de6e95d797856c62c39a4db5e5eddf990ad366579cc99db79687d640568",
